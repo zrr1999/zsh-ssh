@@ -88,7 +88,7 @@ _ssh-host-list() {
         value = tmp[2]
 
         if (key == "Host") { alias = value }
-        if (key == "Hostname") { host_name = value }
+        if (key == "Hostname" || key == "HostName") { host_name = value }
         if (key == "#_Desc") { desc = value }
       }
 
@@ -191,7 +191,6 @@ fzf-complete-ssh() {
       --header-lines=2 \
       --reverse \
       --prompt='SSH Remote > ' \
-      --no-separator \
       --bind 'shift-tab:up,tab:down,bspace:backward-delete-char/eof' \
       --preview 'ssh -T -G $(cut -f 1 -d " " <<< {}) | grep -i -E "^User |^HostName |^Port |^ControlMaster |^ForwardAgent |^LocalForward |^IdentityFile |^RemoteForward |^ProxyCommand |^ProxyJump " | column -t' \
       --preview-window=right:40%
@@ -202,7 +201,9 @@ fzf-complete-ssh() {
       zle accept-line
     fi
 
-    zle reset-prompt
+    TRAPWINCH() {
+      zle && { zle reset-prompt; zle -R }
+    }
     # zle redisplay
 
   # Fall back to default completion
